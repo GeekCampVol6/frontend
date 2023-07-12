@@ -1,5 +1,6 @@
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
+import { css } from '@emotion/react';
 import { RecoilRoot } from 'recoil';
 
 export default function App({
