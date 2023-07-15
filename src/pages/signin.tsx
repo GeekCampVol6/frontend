@@ -1,5 +1,7 @@
 import WaveAnimation from '@/components/signin/WaveAnimation';
+import { au } from '@/firebase/firebase';
 import { css } from '@emotion/react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -189,6 +191,43 @@ const styles = {
 };
 
 const Signin = () => {
+
+  const [inputMail, setMail] = useState("");
+  const [inputName, setName] = useState("");
+  const [inputPass, setPass] = useState("");
+  const [reInputPass, setRePass] = useState("");
+  const [inputClass, setClass] = useState("");
+  const [inputNum, setNum] = useState("26");
+  const [inputIcon, setIcon] = useState<File | null>(null);
+  const [iconName, setIconName] = useState("")
+  const [inputRoll, setRoll] = useState("adomin");
+
+  const [passBool, checkPass ] = useState(false);     // 登録フォーム　パスワード再入力確認フラグ
+  const [loginBool, checkLogin] = useState(false);    // ログインフォーム　ログイン確認フラグ
+  const [upload, setUpload] = useState(false);
+
+  // ログイン
+  const onSubmitLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    signInWithEmailAndPassword(
+        au,
+        inputMail,
+        inputPass
+    ).then((userCredential)=>{
+        const user = userCredential.user;
+        checkLogin(true);
+        // ログイン後の処理
+        alert('ログイン成功')
+    }).catch((error)=>{
+        alert('Don\'t Login ...');
+        console.log("err:" + error);
+        return
+    })
+
+  }
+
+
   const [isSignIn, setIsSignIn] = useState<boolean>(true);
   return (
     <div css={styles.container}>
@@ -206,15 +245,16 @@ const Signin = () => {
       <div css={styles.rightContainer}>
         {/* サインイン */}
         {isSignIn && (
+          <form onSubmit={onSubmitLogin}>
           <div css={styles.signInWrapper}>
             <h1 css={styles.title}>Sign In</h1>
             <div css={styles.inputWrapper}>
               <p>Email</p>
-              <input type="text" />
+              <input type="text" onChange={(e)=>setMail(e.target.value)} value={inputMail}/>
             </div>
             <div css={styles.inputWrapper}>
               <p>Password</p>
-              <input type="password" />
+              <input type="password" onChange={(e)=>setPass(e.target.value)} value={inputPass}/>
             </div>
             <button css={styles.signInButton}>
               Sign in
@@ -233,6 +273,7 @@ const Signin = () => {
               </button>
             </div>
           </div>
+          </form>
         )}
         {/* サインアップ */}
         {!isSignIn && (
