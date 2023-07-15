@@ -1,4 +1,4 @@
-import WaveAnimation from '@/components/elements/signin/WaveAnimation';
+import WaveAnimation from '@/components/signin/WaveAnimation';
 import { css } from '@emotion/react';
 import Image from 'next/image';
 import { useState } from 'react';
