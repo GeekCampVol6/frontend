@@ -1,12 +1,15 @@
-import Navbar from '@/components/elements/Navbar';
-import Callendar from './callendar';
+// import Navbar from '@/components/elements/Navbar';
+// import Callendar from './callendar';
+
+import Signin from './signin';
 
 export default function Home() {
   return (
     <>
       <main>
-        <Navbar />
-        <Callendar />
+        {/* <Navbar />
+        <Callendar /> */}
+        <Signin />
       </main>
     </>
   );
