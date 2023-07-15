@@ -4,7 +4,7 @@ import { RecoilRoot } from 'recoil';
 
 export default function App({
   Component,
-  pageProps,
+  pageProps: { session, ...pageProps },
 }: AppProps) {
   return (
     <RecoilRoot>
