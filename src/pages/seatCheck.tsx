@@ -1,4 +1,5 @@
 import Navbar from '@/components/elements/Navbar';
+import BelongingCard from '@/components/seatCheck/BelongingCard';
 import SubjectPullDawn from '@/components/seatCheck/SubjectPullDawn';
 import { css } from '@emotion/react';
 
@@ -14,8 +15,10 @@ const styles = {
   leftContainer: css`
     flex: 3;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    gap: 2rem;
+    min-height: 70vh;
   `,
   rightContainer: css`
     flex: 7;
@@ -30,6 +33,7 @@ const SeatCheck = () => {
       <div css={styles.container}>
         <div css={styles.leftContainer}>
           <SubjectPullDawn />
+          <BelongingCard />
         </div>
         <div css={styles.rightContainer}></div>
       </div>

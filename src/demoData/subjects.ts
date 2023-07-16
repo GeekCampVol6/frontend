@@ -1,3 +1,4 @@
+// 科目のデータ
 export const subjects = [
   {
     name: 'NT32',
@@ -45,7 +46,7 @@ export const subjects = [
     ],
   },
   {
-    name: 'IH13',
+    name: 'IH31',
     rooms: [
       {
         weekDay: '金',
