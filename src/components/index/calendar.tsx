@@ -1,53 +1,75 @@
+import React, { useState, useEffect, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import jaLocals from '@fullcalendar/core/locales/ja';
 import { css } from '@emotion/react';
 import interactionPlugin from '@fullcalendar/interaction';
-import { useRef } from 'react';
 
 const styles = {
   wrap: css`
-    max-width: 1200px;
+    max-width: 1500px;
     width: 100vw;
-    height: 100vh;
+    height: 80vh;
     display: flex;
+    margin: auto;
     background-color: #62111176;
   `,
   calendar: css`
     max-width: 1200px;
-    width: 100vw;
-    height: 50vh;
+    width: 100%;
+    height: 80vh;
+    background-color: #ffffff;
+  `,
+  event: css`
+    max-width: 1200px;
+    width: 100%;
+    height: 20vh;
     background-color: #ffffff;
   `,
   form: css`
     max-width: 1200px;
-    width: 100vw;
-    height: 50vh;
+    width: 100%;
+    height: 20vh;
     background-color: #e13333;
   `,
 };
 
 export default function Calendar() {
-  const eventNameRef = useRef<HTMLInputElement | null>(
-    null
-  );
-  const eventColorRef = useRef<HTMLInputElement | null>(
-    null
-  );
-  const eventStartRef = useRef<HTMLInputElement | null>(
-    null
-  );
-  const eventEndRef = useRef<HTMLInputElement | null>(null);
-  const eventDescriptionRef =
-    useRef<HTMLInputElement | null>(null);
+  const eventNameRef = useRef(null);
+  const eventColorRef = useRef(null);
+  const eventStartRef = useRef(null);
+  const eventEndRef = useRef(null);
+  const eventDescriptionRef = useRef(null);
+  const calendarRef = useRef(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    // JSON ファイルを読み込む関数
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('events.json');
+        const data = await response.json();
+        setEvents(data);
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const handleEventClick = (info: any) => {
+    setSelectedEvent(info.event);
+  };
 
   const handleSelect = (info: any) => {
-    const eventName = eventNameRef.current?.value;
+    const eventName = eventNameRef.current.value;
     const eventDescription =
-      eventDescriptionRef.current?.value;
-    const eventColor = eventColorRef.current?.value;
+      eventDescriptionRef.current.value;
+    const eventColor = eventColorRef.current.value;
     if (eventName) {
-      const calendarApi = info.view.calendar;
+      const calendarApi = calendarRef.current.getApi();
       calendarApi.addEvent({
         title: eventName,
         color: eventColor,
@@ -59,33 +81,44 @@ export default function Calendar() {
     }
   };
 
-  const handleEventClick = (info: any) => {
-    alert(
-      'イベント名' +
-        info.event.title +
-        '\n' +
-        'イベント説明' +
-        info.event.extendedProps.description +
-        '\n' +
-        '期間' +
-        info.event.startStr +
-        '~' +
-        info.event.endStr +
-        'まで\n'
-    );
-  };
-
-  const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault(); // フォームの送信をキャンセル
-    // handleSelectを呼び出すなどの追加の処理を行う
-    // 例: handleSelect({ view: { calendar: null }, startStr: '', endStr: '', allDay: false });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const eventName = eventNameRef.current.value;
+    const eventDescription =
+      eventDescriptionRef.current.value;
+    const eventColor = eventColorRef.current.value;
+    const calendarApi = calendarRef.current.getApi();
+    if (eventName && calendarApi) {
+      calendarApi.addEvent({
+        title: eventName,
+        color: eventColor,
+        description: eventDescription,
+        start: eventStartRef.current.value,
+        end: eventEndRef.current.value,
+      });
+      e.currentTarget.reset();
+    }
   };
 
   return (
     <>
       <div css={styles.wrap}>
+        <div css={styles.event}>
+          {selectedEvent && (
+            <div>
+              <h3>イベント情報</h3>
+              <p>イベント名: {selectedEvent.title}</p>
+              <p>
+                説明:{' '}
+                {selectedEvent.extendedProps.description}
+              </p>
+              <p>
+                期間: {selectedEvent.startStr} 〜{' '}
+                {selectedEvent.endStr}
+              </p>
+            </div>
+          )}
+        </div>
         <div css={styles.form}>
           <form
             action=""
@@ -102,7 +135,7 @@ export default function Calendar() {
                 ref={eventNameRef}
               />
               <br />
-              　色選択
+              色選択
               <input
                 type="text"
                 name="formcolor"
@@ -134,9 +167,8 @@ export default function Calendar() {
                 ref={eventDescriptionRef}
               />
               <br />
+              <button type="submit">挿入</button>
             </label>
-            <br />
-            <input type="button" value="submit" />
           </form>
         </div>
         <div css={styles.calendar}>
@@ -147,9 +179,10 @@ export default function Calendar() {
             locale="ja"
             selectable={true}
             editable={true}
-            select={handleSelect}
+            events={events}
             eventClick={handleEventClick}
             eventTextColor="black"
+            ref={calendarRef}
           />
         </div>
       </div>
