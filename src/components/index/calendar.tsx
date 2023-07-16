@@ -4,6 +4,8 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import jaLocals from '@fullcalendar/core/locales/ja';
 import { css } from '@emotion/react';
 import interactionPlugin from '@fullcalendar/interaction';
+import { HubOutlined } from '@mui/icons-material';
+import { co } from '@fullcalendar/core/internal-common';
 
 const styles = {
   wrap: css`
@@ -99,6 +101,13 @@ export default function Calendar() {
       e.currentTarget.reset();
     }
   };
+  const handleDelete = () => {
+    const calendarApi = calendarRef.current.getApi();
+    if (selectedEvent) {
+      calendarApi.getEventById(selectedEvent.id).remove();
+      setSelectedEvent(null);
+    }
+  };
 
   return (
     <>
@@ -116,6 +125,7 @@ export default function Calendar() {
                 期間: {selectedEvent.startStr} 〜{' '}
                 {selectedEvent.endStr}
               </p>
+              <button onClick={handleDelete}>削除</button>
             </div>
           )}
         </div>
