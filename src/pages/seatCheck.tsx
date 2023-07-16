@@ -1,4 +1,5 @@
 import Navbar from '@/components/elements/Navbar';
+import AttendCard from '@/components/seatCheck/AttendCard';
 import BelongingCard from '@/components/seatCheck/BelongingCard';
 import SubjectPullDawn from '@/components/seatCheck/SubjectPullDawn';
 import { css } from '@emotion/react';
@@ -34,6 +35,7 @@ const SeatCheck = () => {
         <div css={styles.leftContainer}>
           <SubjectPullDawn />
           <BelongingCard />
+          <AttendCard />
         </div>
         <div css={styles.rightContainer}></div>
       </div>

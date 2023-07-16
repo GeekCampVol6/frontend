@@ -42,7 +42,7 @@ const BelongingCard = () => {
 
   return (
     <div css={styles.container}>
-      <h2>持ち物リスト</h2>
+      <h2>持ち物</h2>
       <div>
         {belongingList[0] &&
           belongingList[0].detail &&
