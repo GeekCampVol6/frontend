@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import jaLocals from '@fullcalendar/core/locales/ja';
@@ -42,8 +42,28 @@ export default function Calendar() {
   const eventDescriptionRef = useRef(null);
   const calendarRef = useRef(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [events, setEvents] = useState([]);
 
-  const handleSelect = (info) => {
+  useEffect(() => {
+    // JSON ファイルを読み込む関数
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('events.json');
+        const data = await response.json();
+        setEvents(data);
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const handleEventClick = (info: any) => {
+    setSelectedEvent(info.event);
+  };
+
+  const handleSelect = (info: any) => {
     const eventName = eventNameRef.current.value;
     const eventDescription =
       eventDescriptionRef.current.value;
@@ -59,10 +79,6 @@ export default function Calendar() {
         allDay: info.allDay,
       });
     }
-  };
-
-  const handleEventClick = (info) => {
-    setSelectedEvent(info.event);
   };
 
   const handleSubmit = (e) => {
@@ -163,7 +179,7 @@ export default function Calendar() {
             locale="ja"
             selectable={true}
             editable={true}
-            select={handleSelect}
+            events={events}
             eventClick={handleEventClick}
             eventTextColor="black"
             ref={calendarRef}
