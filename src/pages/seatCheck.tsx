@@ -1,6 +1,7 @@
 import Navbar from '@/components/elements/Navbar';
 import AttendCard from '@/components/seatCheck/AttendCard';
 import BelongingCard from '@/components/seatCheck/BelongingCard';
+import SeatCard from '@/components/seatCheck/SeatCard';
 import SubjectPullDawn from '@/components/seatCheck/SubjectPullDawn';
 import { css } from '@emotion/react';
 
@@ -23,7 +24,6 @@ const styles = {
   `,
   rightContainer: css`
     flex: 7;
-    background-color: #666666;
   `,
 };
 
@@ -37,7 +37,9 @@ const SeatCheck = () => {
           <BelongingCard />
           <AttendCard />
         </div>
-        <div css={styles.rightContainer}></div>
+        <div css={styles.rightContainer}>
+          <SeatCard />
+        </div>
       </div>
     </main>
   );
