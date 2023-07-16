@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import jaLocals from '@fullcalendar/core/locales/ja';
 import { css } from '@emotion/react';
 import interactionPlugin from '@fullcalendar/interaction';
-
 import { useRef, useState } from 'react';
 import { db } from '@/firebase/firebase';
 import { addDoc, collection } from 'firebase/firestore';
@@ -22,8 +20,6 @@ const styles = {
     margin: 0 auto;
     display: flex;
     justify-content: center;
-
-
   `,
   titleBox: css`
     flex: 1;
@@ -47,7 +43,6 @@ const styles = {
   border: 2px solid #1cc18e;
   border-radius: 10px;
   padding: 1vh 1vw;
-
   `,
   btnDesign: css`
 
@@ -76,41 +71,26 @@ const styles = {
 };
 
 export default function Calendar() {
-  const eventNameRef = useRef(null);
-  const eventColorRef = useRef(null);
-  const eventStartRef = useRef(null);
-  const eventEndRef = useRef(null);
-  const eventDescriptionRef = useRef(null);
-  const calendarRef = useRef(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [events, setEvents] = useState([]);
-
-  useEffect(() => {
-    // JSON ファイルを読み込む関数
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch('events.json');
-        const data = await response.json();
-        setEvents(data);
-      } catch (error) {
-        console.error('Failed to fetch events:', error);
-      }
-    };
-
-    fetchEvents();
-  }, []);
-
-  const handleEventClick = (info: any) => {
-    setSelectedEvent(info.event);
-  };
+  const eventNameRef = useRef<HTMLInputElement | null>(
+    null
+  );
+  const eventColorRef = useRef<HTMLInputElement | null>(
+    null
+  );
+  const eventStartRef = useRef<HTMLInputElement | null>(
+    null
+  );
+  const eventEndRef = useRef<HTMLInputElement | null>(null);
+  const eventDescriptionRef =
+    useRef<HTMLInputElement | null>(null);
 
   const handleSelect = (info: any) => {
-    const eventName = eventNameRef.current.value;
+    const eventName = eventNameRef.current?.value;
     const eventDescription =
-      eventDescriptionRef.current.value;
-    const eventColor = eventColorRef.current.value;
+      eventDescriptionRef.current?.value;
+    const eventColor = eventColorRef.current?.value;
     if (eventName) {
-      const calendarApi = calendarRef.current.getApi();
+      const calendarApi = info.view.calendar;
       calendarApi.addEvent({
         title: eventName,
         color: eventColor,
@@ -122,25 +102,21 @@ export default function Calendar() {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const eventName = eventNameRef.current.value;
-    const eventDescription =
-      eventDescriptionRef.current.value;
-    const eventColor = eventColorRef.current.value;
-    const calendarApi = calendarRef.current.getApi();
-    if (eventName && calendarApi) {
-      calendarApi.addEvent({
-        title: eventName,
-        color: eventColor,
-        description: eventDescription,
-        start: eventStartRef.current.value,
-        end: eventEndRef.current.value,
-      });
-      e.currentTarget.reset();
-    }
+  const handleEventClick = (info: any) => {
+    alert(
+      'イベント名' +
+        info.event.title +
+        '\n' +
+        'イベント説明' +
+        info.event.extendedProps.description +
+        '\n' +
+        '期間' +
+        info.event.startStr +
+        '~' +
+        info.event.endStr +
+        'まで\n'
+    );
   };
-
 
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
@@ -174,8 +150,6 @@ export default function Calendar() {
     //     console.log("err:" + err);
     //     return
     // }
-
-
   };
 
 
@@ -190,7 +164,6 @@ export default function Calendar() {
   return (
     <>
       <div css={styles.wrap}>
-
         <div css={styles.containar}>
           <div>
             <div css={styles.titleBox}>
@@ -260,7 +233,6 @@ export default function Calendar() {
               </form>
             </div>
           </div>
-
         <div css={styles.calendar}>
           <FullCalendar
             plugins={[dayGridPlugin, interactionPlugin]}
@@ -269,10 +241,9 @@ export default function Calendar() {
             locale="ja"
             selectable={true}
             editable={true}
-            events={events}
+            select={handleSelect}
             eventClick={handleEventClick}
             eventTextColor="black"
-            ref={calendarRef}
           />
         </div>
         </div>
