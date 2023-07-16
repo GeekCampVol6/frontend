@@ -1,15 +1,14 @@
-// import Navbar from '@/components/elements/Navbar';
-// import Callendar from './callendar';
+import Navbar from '@/components/elements/Navbar';
+import CalendarPage from './calendar';
 
-import Signin from './signin';
+// import Signin from './signin';
 
 export default function Home() {
   return (
     <>
       <main>
-        {/* <Navbar />
-        <Callendar /> */}
-        <Signin />
+        <Navbar />
+        <CalendarPage />
       </main>
     </>
   );
