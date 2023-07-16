@@ -167,7 +167,6 @@ export default function Calendar() {
         <div css={styles.containar}>
           <div>
             <div css={styles.titleBox}>
-              a
             </div>
             <div css={styles.form}>
               <form

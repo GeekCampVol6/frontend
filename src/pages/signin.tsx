@@ -6,6 +6,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'fire
 import Image from 'next/image';
 import { useState } from 'react';
 import { addDoc, collection } from 'firebase/firestore';
+import { useRouter } from 'next/router';
 
 const styles = {
   container: css`
@@ -194,6 +195,18 @@ const styles = {
 
 const Signin = () => {
 
+
+  const router = useRouter();
+
+  // 現在のURLのパスを取得
+  const currentPath = router.pathname;
+
+  // ページ遷移
+  const goToAboutPage = () => {
+    console.log(router)
+    router.push('/calendar');
+  };
+
   const [inputMail, setMail] = useState("");
   const [inputName, setName] = useState("");
   const [inputPass, setPass] = useState("");
@@ -221,6 +234,11 @@ const Signin = () => {
         checkLogin(true);
         // ログイン後の処理
         alert('ログイン成功')
+        const data = { key: true };
+        router.push({
+          pathname: '/calendar',
+          query: data,
+        });
     }).catch((error)=>{
         alert('Don\'t Login ...');
         console.log("err:" + error);
