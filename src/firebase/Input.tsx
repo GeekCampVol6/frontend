@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { db, au } from "./fairebase";
+import { db, au, storage } from "./firebase";
 import {collection, addDoc, serverTimestamp} from "firebase/firestore";
 import { async } from "@firebase/util";
 import {createUserWithEmailAndPassword, signInWithEmailAndPassword} from "firebase/auth";
+import { ref, uploadBytes } from "firebase/storage";
 import { error } from "console";
+import { Upload } from "@mui/icons-material";
 
 const Input:React.FC = ()=>{
 
@@ -13,15 +15,20 @@ const Input:React.FC = ()=>{
     const [reInputPass, setRePass] = useState("");
     const [inputClass, setClass] = useState("");
     const [inputNum, setNum] = useState("26");
-    const [inputIcon, setIcon] = useState("Demo");
+    const [inputIcon, setIcon] = useState<File | null>(null);
+    const [iconName, setIconName] = useState("")
     const [inputRoll, setRoll] = useState("adomin");
 
     const [passBool, checkPass ] = useState(false);     // 登録フォーム　パスワード再入力確認フラグ
     const [loginBool, checkLogin] = useState(false);    // ログインフォーム　ログイン確認フラグ
+    const [upload, setUpload] = useState(false);
+
 
     // ログイン
     const onSubmitLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        
 
         signInWithEmailAndPassword(
             au,
@@ -43,6 +50,7 @@ const Input:React.FC = ()=>{
     const onSubmitAdd = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+
         if (inputPass != reInputPass) {
             checkPass(true);
             return
@@ -63,20 +71,62 @@ const Input:React.FC = ()=>{
             return
         }
 
+        // 画像のアップ
         try {
-            await addDoc(collection(db, 'todos'),{
-                mail: inputMail,
-                name: inputName,
-                pass: inputPass,
-                class: inputClass,
-                number: inputNum,
-                icon: inputIcon,
-                inputRoll: inputRoll
-            })
-        }catch(err){
-            alert('regist error')
-            console.log("err:" + err);
-            return
+            console.log('koko')
+
+            setUpload(true);
+
+            // const mountRef = ref(storage, 'test.jpeg')
+            // const mountImagesRef = ref(storage, 'test.jpg')
+
+            // mountRef.name === mountImagesRef.name           // true
+            // mountRef.fullPath === mountImagesRef.fullPath   // false
+
+            // const storageRef = ref(storage, "some-child");
+
+            
+            if (inputIcon !== undefined && inputIcon !== null) {
+
+                const fileExtension = inputIcon.name.substring(inputIcon.name.lastIndexOf('.') + 1);
+
+                const filename:string = inputClass + inputNum + '.' + fileExtension;
+
+                const storageRef = ref(storage, 'images/' + filename);
+
+                setIconName(filename);
+                // setIconName
+                await uploadBytes(storageRef, inputIcon).then((snapshot) => {
+                    console.log('Uploaded a blob or file!');
+                    setUpload(false)
+
+                    // ユーザ情報をStoreに登録
+                    try {
+                        console.log(iconName)
+                        addDoc(collection(db, 'Users'),{
+                            mail: inputMail,
+                            name: inputName,
+                            pass: inputPass,
+                            class: inputClass,
+                            number: inputNum,
+                            Roll: inputRoll,
+                            iconName: filename
+                        }).then(()=>{
+                            alert("登録完了")
+                        }).catch(()=>{
+                            alert("登録失敗")
+                        })
+                    }
+                    catch(err){
+                        alert('regist error')
+                        console.log("err:" + err);
+                        return
+                    }
+                  });
+            }
+
+        }catch{
+            alert("サムネイルの登録に失敗しました")
         }
 
         
@@ -86,7 +136,6 @@ const Input:React.FC = ()=>{
         setRePass('');
         setClass('');
         setNum('');
-        setIcon('');
         setRoll('');
     };
 
@@ -101,7 +150,11 @@ const Input:React.FC = ()=>{
                 RePass:<input onChange={(e) => setRePass(e.target.value)} value={reInputPass}/><br />
                 Class:<input onChange={(e) => setClass(e.target.value)} value={inputClass}/><br />
                 Num:<input type="Number" onChange={(e) => setNum(e.target.value)} value={inputNum}/><br />
-                Icon:<input onChange={(e) => setIcon(e.target.value)} value={inputIcon}/><br />
+                Icon:<input type="file" onChange={(e) => {
+                    if (e.target.files !== null && e.target.files.length > 0) {
+                        setIcon(e.target.files[0]);
+                      }
+                }} accept="image/jpeg" />{upload && <><br /><p> Upload Now!</p></>}<br />
                 Roll:<input onChange={(e) => setRoll(e.target.value)} value={inputRoll}/><br />
                 <button>Regist</button>
                 {passBool && <p>Password Miss match</p>}

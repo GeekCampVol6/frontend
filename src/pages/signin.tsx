@@ -1,7 +1,12 @@
 import WaveAnimation from '@/components/signin/WaveAnimation';
+import { au, storage, db } from '@/firebase/firebase';
+import { ref, uploadBytes } from 'firebase/storage';
 import { css } from '@emotion/react';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import Image from 'next/image';
 import { useState } from 'react';
+import { addDoc, collection } from 'firebase/firestore';
+import { useRouter } from 'next/router';
 
 const styles = {
   container: css`
@@ -189,6 +194,143 @@ const styles = {
 };
 
 const Signin = () => {
+
+
+  const router = useRouter();
+
+  // 現在のURLのパスを取得
+  const currentPath = router.pathname;
+
+  // ページ遷移
+  const goToAboutPage = () => {
+    console.log(router)
+    router.push('/calendar');
+  };
+
+  const [inputMail, setMail] = useState("");
+  const [inputName, setName] = useState("");
+  const [inputPass, setPass] = useState("");
+  const [reInputPass, setRePass] = useState("");
+  const [inputClass, setClass] = useState("");
+  const [inputNum, setNum] = useState("");
+  const [inputIcon, setIcon] = useState<File | null>(null);
+  const [iconName, setIconName] = useState("")
+  const [inputRoll, setRoll] = useState("student");
+
+  // const [passBool, checkPass ] = useState(false);     // 登録フォーム　パスワード再入力確認フラグ
+  const [loginBool, checkLogin] = useState(false);    // ログインフォーム　ログイン確認フラグ
+  const [upload, setUpload] = useState(false);
+
+  // ログイン
+  const onSubmitLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    signInWithEmailAndPassword(
+        au,
+        inputMail,
+        inputPass
+    ).then((userCredential)=>{
+        const user = userCredential.user;
+        checkLogin(true);
+        // ログイン後の処理
+        alert('ログイン成功')
+        const data = { key: true };
+        router.push({
+          pathname: '/calendar',
+          query: data,
+        });
+    }).catch((error)=>{
+        alert('Don\'t Login ...');
+        console.log("err:" + error);
+        return
+    })
+
+  }
+
+
+    // 登録
+    const onSubmitAdd = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      try {
+          await createUserWithEmailAndPassword(
+              au,
+              inputMail,
+              inputPass
+          ).then((userCredential)=>{
+              const user = userCredential.user;
+              // 登録後の処理
+          })
+      }catch(err){
+          alert('regist error')
+          console.log("err:" + err);
+          return
+      }
+
+      // 画像のアップ
+      try {
+          console.log('koko')
+
+          setUpload(true);
+
+          
+          if (inputIcon !== undefined && inputIcon !== null) {
+
+              const fileExtension = inputIcon.name.substring(inputIcon.name.lastIndexOf('.') + 1);
+
+              const filename:string = inputClass + inputNum + '.' + fileExtension;
+
+              const storageRef = ref(storage, 'images/' + filename);
+
+              setIconName(filename);
+
+              await uploadBytes(storageRef, inputIcon).then((snapshot) => {
+                  console.log('画像アップロード完了！');
+                  setUpload(false)
+
+                  // ユーザ情報をStoreに登録
+                  try {
+                      console.log(iconName)
+                      addDoc(collection(db, 'Users'),{
+                          mail: inputMail,
+                          name: inputName,
+                          pass: inputPass,
+                          class: inputClass,
+                          number: inputNum,
+                          Roll: inputRoll,
+                          iconName: filename
+                      }).then(()=>{
+                          alert("登録完了")
+                          // 登録完了後の処理
+
+
+
+                      }).catch(()=>{
+                          alert("登録失敗")
+                      })
+                  }
+                  catch(err){
+                      alert('regist error')
+                      console.log("err:" + err);
+                      return
+                  }
+                });
+          }
+
+      }catch{
+          alert("サムネイルの登録に失敗しました")
+      }
+
+      
+      setMail('');
+      setName('');
+      setPass('');
+      setClass('');
+      setNum('');
+      // setRoll('');
+  };
+
+
   const [isSignIn, setIsSignIn] = useState<boolean>(true);
   return (
     <div css={styles.container}>
@@ -206,15 +348,16 @@ const Signin = () => {
       <div css={styles.rightContainer}>
         {/* サインイン */}
         {isSignIn && (
+          <form onSubmit={onSubmitLogin}>
           <div css={styles.signInWrapper}>
             <h1 css={styles.title}>Sign In</h1>
             <div css={styles.inputWrapper}>
               <p>Email</p>
-              <input type="text" />
+              <input type="text" onChange={(e)=>setMail(e.target.value)} value={inputMail}/>
             </div>
             <div css={styles.inputWrapper}>
               <p>Password</p>
-              <input type="password" />
+              <input type="password" onChange={(e)=>setPass(e.target.value)} value={inputPass}/>
             </div>
             <button css={styles.signInButton}>
               Sign in
@@ -233,31 +376,33 @@ const Signin = () => {
               </button>
             </div>
           </div>
+          </form>
         )}
         {/* サインアップ */}
         {!isSignIn && (
+          <form onSubmit={onSubmitAdd}>
           <div css={styles.signUpWrapper}>
             <h1 css={styles.title}>Sign Up</h1>
             <div css={styles.inputWrapper}>
               <p>Name</p>
-              <input type="text" />
+              <input type="text" onChange={(e)=>setName(e.target.value)} value={inputName} />
             </div>
 
             <div css={styles.inputWrapper}>
               <p>Email</p>
-              <input type="text" />
+              <input type="text" onChange={(e)=>setMail(e.target.value)} value={inputMail}/>
             </div>
             <div css={styles.inputWrapper}>
               <p>Password</p>
-              <input type="password" />
+              <input type="password" onChange={(e)=>setPass(e.target.value)} value={inputPass}/>
             </div>
             <div css={styles.inputWrapper}>
               <p>クラス</p>
-              <input type="text" />
+              <input type="text" onChange={(e)=>setClass(e.target.value)} value={inputClass}/>
             </div>
             <div css={styles.inputWrapper}>
               <p>出席番号</p>
-              <input type="number" />
+              <input type="number" onChange={(e)=>setNum(e.target.value)} value={inputNum}/>
             </div>
             <div css={styles.inputWrapper}>
               <p>アイコン画像</p>
@@ -275,6 +420,11 @@ const Signin = () => {
                   <input
                     type="file"
                     css={styles.inputFile}
+                    onChange={(e) => {
+                      if (e.target.files !== null && e.target.files.length > 0) {
+                          setIcon(e.target.files[0]);
+                        }
+                  }} accept="image/jpeg" 
                   />
                 </label>
               </div>
@@ -296,6 +446,7 @@ const Signin = () => {
               </button>
             </div>
           </div>
+          </form>
         )}
       </div>
     </div>

@@ -1,13 +1,16 @@
 import Navbar from '@/components/elements/Navbar';
-import Calendar from '../components/index/calendar';
+import CalendarPage from './calendar';
+
+import Signin from './signin';
+import { BrowserRouter, Route } from 'react-router-dom';
+import Calendar from '@/components/index/calendar';
+
 
 export default function Home() {
+
   return (
-    <>
-      <main>
-        <Navbar />
-        <Calendar />
-      </main>
-    </>
+    <main>
+      <Signin />
+    </main>
   );
 }
