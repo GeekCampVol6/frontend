@@ -103,7 +103,7 @@ const Navbar = () => {
             <p>ClassMate</p>
           </Link>
           <div css={styles.buttonList}>
-            <Link href={'/'} css={styles.link}>
+            <Link href={'/seatCheck'} css={styles.link}>
               座席
             </Link>
             <Link href={'/'} css={styles.link}>
